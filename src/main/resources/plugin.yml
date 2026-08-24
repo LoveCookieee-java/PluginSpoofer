@@ -1,0 +1,22 @@
+﻿name: PluginSpoofer
+version: '1.0.0'
+main: dev.khoa.plugin.pluginspoofer.PluginSpoofer
+api-version: '1.21'
+folia-supported: true
+author: Khoa
+description: Enterprise Plugin Cloaking and Spoofing for Paper and Folia 1.21+
+
+commands:
+  pluginspoofer:
+    description: PluginSpoofer administrative command
+    permission: pluginspoofer.admin
+    usage: /pluginspoofer [reload]
+    aliases: [pspoof, spoofer]
+
+permissions:
+  pluginspoofer.bypass:
+    description: Allows viewing real plugins, real command tree, and uncloaked tab completions
+    default: op
+  pluginspoofer.admin:
+    description: Allows executing PluginSpoofer administrative commands
+    default: op

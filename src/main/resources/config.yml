@@ -1,0 +1,160 @@
+# ==============================================================================
+#                  PluginSpoofer - Ultimate Plugin Cloaking & Spoofing
+# Defeats Meteor Client (.server plugins), Wurst (.plugins), LiquidBounce (Plugins),
+# Tab-complete probes (/ver <tab>), and direct /pl /ver command snooping.
+# ==============================================================================
+
+# Enable or disable the entire plugin functionality
+enabled: true
+
+# Mode:
+# "SPOOF" -> Displays a believable list of fake plugins (/pl, tab-completion, command tree)
+# "HIDE"  -> Completely masks all commands with standard Vanilla unknown command messages
+mode: "SPOOF"
+
+# Bypass permission for Server Operators and Staff
+bypass-permission: "pluginspoofer.bypass"
+
+# ==============================================================================
+# Fake Plugins List (Active when mode is "SPOOF")
+# ==============================================================================
+fake-plugins:
+  - name: "WorldEdit"
+    version: "7.3.0"
+    authors: ["sk89q", "EngineHub"]
+    description: "WorldEdit in-game map editor"
+    fake-commands: ["worldedit:wand", "worldedit:set", "worldedit:cut", "worldedit:paste"]
+  - name: "Essentials"
+    version: "2.20.1"
+    authors: ["Zenexer", "ementalo"]
+    description: "Provides essential commands and utilities"
+    fake-commands: ["essentials:spawn", "essentials:tp", "essentials:home", "essentials:warp"]
+  - name: "Vault"
+    version: "1.7.3-b131"
+    authors: ["cossinater", "Kevlar"]
+    description: "Vault is a Permissions & Economy API"
+    fake-commands: ["vault:vault-info"]
+  - name: "LuckPerms"
+    version: "5.4.102"
+    authors: ["Luck"]
+    description: "A permissions plugin"
+    fake-commands: ["luckperms:lp", "luckperms:luckperms"]
+
+# Formatting for /plugins and /pl when mode is "SPOOF"
+spoof-plugins-format: "&fPlugins (%count%): %plugins%"
+plugin-name-format: "&a%name%"
+plugin-separator: "&f, "
+
+# Formatting for /ver <FakePlugin>
+fake-version-format:
+  - "&a%name% version %version% by %authors%"
+  - "&f%description%"
+
+# Message returned when /ver is executed for an unknown/hidden plugin
+unknown-plugin-version-message: "&cThis server is not running any plugin by that name.\n&cUse /plugins to get a list of plugins."
+
+# ==============================================================================
+# Sensitive Plugins & Known Command Aliases to Always Hide (Case-Insensitive)
+# ==============================================================================
+hidden-plugin-names:
+  - "AntiOpsec"
+  - "asp"
+  - "AntiSpoofing"
+  - "GrimAC"
+  - "grim"
+  - "Vulcan"
+  - "Matrix"
+  - "Polar"
+  - "Intave"
+  - "Karhu"
+  - "Spartan"
+  - "NoCheatPlus"
+  - "ncp"
+  - "AAC"
+  - "CoreProtect"
+  - "co"
+  - "nLogin"
+  - "AuthMe"
+  - "ExploitsX"
+  - "IllegalStack"
+  - "Spark"
+  - "ViaVersion"
+  - "ViaBackwards"
+  - "ProtocolLib"
+  - "Geyser-Spigot"
+  - "Floodgate"
+  - "PluginSpoofer"
+
+# ==============================================================================
+# Command Tree (Brigadier) Cloaking
+# ==============================================================================
+command-tree:
+  # Filter all ':' colon command nodes (e.g. antiopsec:asp, grimac:grim)
+  filter-colon-commands: true
+  # Remove /plugins, /pl, /ver, /version, /about from Brigadier command tree
+  hide-version-commands: true
+  # Inject fake namespace commands into command tree (e.g. worldedit:wand, essentials:spawn)
+  # This makes Meteor Client's command tree parser explicitly detect the fake plugins!
+  spoof-fake-namespaces: true
+
+# ==============================================================================
+# Error Oracle Normalization
+# ==============================================================================
+# Exact Vanilla Unknown Command message (prevents permission probing)
+unknown-command-message: "&cUnknown or incomplete command, see below for error\n&c<--[HERE]"
+
+# ==============================================================================
+# Advanced Command Filter & Client Prefix Interceptor
+# ==============================================================================
+command-filter:
+  enabled: true
+  # Response mode when a command is blocked:
+  # "VANILLA_UNKNOWN" -> Sends standard vanilla unknown command message (recommended)
+  # "CUSTOM"          -> Sends custom-block-message
+  block-response-mode: "VANILLA_UNKNOWN"
+  custom-block-message: "&cYou do not have permission to execute this command."
+
+  # Explicit list of blocked commands (case-insensitive, without leading /)
+  blocked-commands:
+    - "op"
+    - "deop"
+    - "stop"
+    - "reload"
+    - "rl"
+    - "restart"
+    - "icanhasbukkit"
+    - "version"
+    - "ver"
+    - "about"
+    - "plugins"
+    - "pl"
+    - "bukkit:ver"
+    - "bukkit:version"
+    - "bukkit:about"
+    - "bukkit:plugins"
+    - "bukkit:pl"
+    - "bukkit:help"
+    - "bukkit:?"
+    - "paper:version"
+    - "paper:ver"
+    - "spigot:version"
+    - "minecraft:tell"
+    - "minecraft:me"
+    - "minecraft:w"
+    - "minecraft:msg"
+
+  # Regex patterns of blocked commands
+  blocked-patterns:
+    - "^(bukkit|minecraft|spigot|paper):.*"
+
+  # Hacked client command prefixes blocked in regular chat
+  blocked-prefixes:
+    - "."
+    - "#"
+    - "@"
+    - ","
+    - ";"
+    - "!"
+
+  # Automatically unwrap nested commands (e.g. /execute as @p run ver)
+  unwrap-execute-commands: true
