@@ -64,12 +64,17 @@ class PluginSpoofManagerTest {
                 true,
                 "&cUnknown or incomplete command, see below for error\n&c<--[HERE]",
                 true,
+                true,
+                true,
                 SpoofConfig.BlockResponseMode.VANILLA_UNKNOWN,
                 "&cYou do not have permission to execute this command.",
                 blockedCommands,
                 blockedPatterns,
                 blockedPrefixes,
-                true
+                true,
+                true,
+                "&c[PluginSpoofer Alert] &ePlayer &f%player% &eđã gửi lệnh nghi vấn client hack: &c%message%",
+                "&c[PluginSpoofer Alert] &ePlayer &f%player% &ecố gắng chạy/dò quét lệnh bị chặn: &c%command%"
         );
     }
 
@@ -174,12 +179,17 @@ class PluginSpoofManagerTest {
                 false,
                 defaultConfig.getUnknownCommandMessage(),
                 true,
+                true,
+                true,
                 SpoofConfig.BlockResponseMode.VANILLA_UNKNOWN,
                 defaultConfig.getCustomBlockMessage(),
                 defaultConfig.getBlockedCommands(),
                 defaultConfig.getBlockedPatterns(),
                 defaultConfig.getBlockedPrefixes(),
-                true
+                true,
+                true,
+                defaultConfig.getClientPrefixAlertFormat(),
+                defaultConfig.getBlockedCommandAlertFormat()
         );
 
         List<String> completions = manager.getTabCompletions(hideConfig, "/ver ");
@@ -249,15 +259,40 @@ class PluginSpoofManagerTest {
                 true,
                 defaultConfig.getUnknownCommandMessage(),
                 true,
+                true,
+                true,
                 SpoofConfig.BlockResponseMode.CUSTOM,
                 "&cYou do not have permission to execute this command.",
                 defaultConfig.getBlockedCommands(),
                 defaultConfig.getBlockedPatterns(),
                 defaultConfig.getBlockedPrefixes(),
-                true
+                true,
+                true,
+                defaultConfig.getClientPrefixAlertFormat(),
+                defaultConfig.getBlockedCommandAlertFormat()
         );
 
         String customMsg = manager.getBlockResponseMessage(customConfig);
         assertTrue(customMsg.contains("You do not have permission"));
+    }
+
+    @Test
+    @DisplayName("TC-13: Verify Admin Alert message formatting")
+    void testTC13_AdminAlertFormatting() {
+        String prefixAlert = manager.formatClientPrefixAlert(defaultConfig, "HackerGuy", ".plugins");
+        assertTrue(prefixAlert.contains("HackerGuy"));
+        assertTrue(prefixAlert.contains(".plugins"));
+
+        String cmdAlert = manager.formatBlockedCommandAlert(defaultConfig, "ScannerBot", "/grim reload");
+        assertTrue(cmdAlert.contains("ScannerBot"));
+        assertTrue(cmdAlert.contains("/grim reload"));
+    }
+
+    @Test
+    @DisplayName("TC-14: Verify Strict Permission Cloaking configuration flags")
+    void testTC14_StrictPermissionCloakingFlags() {
+        assertTrue(defaultConfig.isHideUnauthorizedCommands());
+        assertTrue(defaultConfig.isMaskNoPermissionErrors());
+        assertTrue(defaultConfig.isAdminAlertsEnabled());
     }
 }

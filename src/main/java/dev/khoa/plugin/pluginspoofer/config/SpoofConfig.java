@@ -36,6 +36,10 @@ public class SpoofConfig {
     private final boolean spoofFakeNamespaces;
     private final String unknownCommandMessage;
 
+    // Strict Permission Cloaking
+    private final boolean hideUnauthorizedCommands;
+    private final boolean maskNoPermissionErrors;
+
     // Command Filter settings
     private final boolean commandFilterEnabled;
     private final BlockResponseMode blockResponseMode;
@@ -44,6 +48,11 @@ public class SpoofConfig {
     private final List<Pattern> blockedPatterns;
     private final List<String> blockedPrefixes;
     private final boolean unwrapExecuteCommands;
+
+    // Admin Alerts settings
+    private final boolean adminAlertsEnabled;
+    private final String clientPrefixAlertFormat;
+    private final String blockedCommandAlertFormat;
 
     public SpoofConfig(
             boolean enabled,
@@ -60,13 +69,18 @@ public class SpoofConfig {
             boolean hideVersionCommands,
             boolean spoofFakeNamespaces,
             String unknownCommandMessage,
+            boolean hideUnauthorizedCommands,
+            boolean maskNoPermissionErrors,
             boolean commandFilterEnabled,
             BlockResponseMode blockResponseMode,
             String customBlockMessage,
             Set<String> blockedCommands,
             List<Pattern> blockedPatterns,
             List<String> blockedPrefixes,
-            boolean unwrapExecuteCommands
+            boolean unwrapExecuteCommands,
+            boolean adminAlertsEnabled,
+            String clientPrefixAlertFormat,
+            String blockedCommandAlertFormat
     ) {
         this.enabled = enabled;
         this.mode = mode != null ? mode : SpoofMode.SPOOF;
@@ -82,6 +96,8 @@ public class SpoofConfig {
         this.hideVersionCommands = hideVersionCommands;
         this.spoofFakeNamespaces = spoofFakeNamespaces;
         this.unknownCommandMessage = unknownCommandMessage != null ? unknownCommandMessage : "&cUnknown or incomplete command, see below for error\n&c<--[HERE]";
+        this.hideUnauthorizedCommands = hideUnauthorizedCommands;
+        this.maskNoPermissionErrors = maskNoPermissionErrors;
         this.commandFilterEnabled = commandFilterEnabled;
         this.blockResponseMode = blockResponseMode != null ? blockResponseMode : BlockResponseMode.VANILLA_UNKNOWN;
         this.customBlockMessage = customBlockMessage != null ? customBlockMessage : "&cYou do not have permission to execute this command.";
@@ -89,6 +105,9 @@ public class SpoofConfig {
         this.blockedPatterns = blockedPatterns != null ? List.copyOf(blockedPatterns) : Collections.emptyList();
         this.blockedPrefixes = blockedPrefixes != null ? List.copyOf(blockedPrefixes) : Collections.emptyList();
         this.unwrapExecuteCommands = unwrapExecuteCommands;
+        this.adminAlertsEnabled = adminAlertsEnabled;
+        this.clientPrefixAlertFormat = clientPrefixAlertFormat != null ? clientPrefixAlertFormat : "&c[PluginSpoofer Alert] &ePlayer &f%player% &eđã gửi lệnh nghi vấn client hack: &c%message%";
+        this.blockedCommandAlertFormat = blockedCommandAlertFormat != null ? blockedCommandAlertFormat : "&c[PluginSpoofer Alert] &ePlayer &f%player% &ecố gắng chạy/dò quét lệnh bị chặn: &c%command%";
     }
 
     public static SpoofConfig fromBukkitConfig(FileConfiguration config) {
@@ -160,6 +179,10 @@ public class SpoofConfig {
         String unknownCommandMessage = config.getString("unknown-command-message",
                 "&cUnknown or incomplete command, see below for error\n&c<--[HERE]");
 
+        // Strict Permission Cloaking
+        boolean hideUnauthorizedCommands = config.getBoolean("strict-permission-cloaking.hide-unauthorized-commands", true);
+        boolean maskNoPermissionErrors = config.getBoolean("strict-permission-cloaking.mask-no-permission-errors", true);
+
         // Command Filter parsing
         boolean commandFilterEnabled = config.getBoolean("command-filter.enabled", true);
         String rawResponseMode = config.getString("command-filter.block-response-mode", "VANILLA_UNKNOWN");
@@ -203,6 +226,13 @@ public class SpoofConfig {
 
         boolean unwrapExecuteCommands = config.getBoolean("command-filter.unwrap-execute-commands", true);
 
+        // Admin alerts parsing
+        boolean adminAlertsEnabled = config.getBoolean("admin-alerts.enabled", true);
+        String clientPrefixAlertFormat = config.getString("admin-alerts.client-prefix-alert",
+                "&c[PluginSpoofer Alert] &ePlayer &f%player% &eđã gửi lệnh nghi vấn client hack: &c%message%");
+        String blockedCommandAlertFormat = config.getString("admin-alerts.blocked-command-alert",
+                "&c[PluginSpoofer Alert] &ePlayer &f%player% &ecố gắng chạy/dò quét lệnh bị chặn: &c%command%");
+
         return new SpoofConfig(
                 enabled,
                 mode,
@@ -218,13 +248,18 @@ public class SpoofConfig {
                 hideVersionCommands,
                 spoofFakeNamespaces,
                 unknownCommandMessage,
+                hideUnauthorizedCommands,
+                maskNoPermissionErrors,
                 commandFilterEnabled,
                 blockResponseMode,
                 customBlockMessage,
                 blockedCommands,
                 blockedPatterns,
                 blockedPrefixes,
-                unwrapExecuteCommands
+                unwrapExecuteCommands,
+                adminAlertsEnabled,
+                clientPrefixAlertFormat,
+                blockedCommandAlertFormat
         );
     }
 
@@ -284,6 +319,14 @@ public class SpoofConfig {
         return unknownCommandMessage;
     }
 
+    public boolean isHideUnauthorizedCommands() {
+        return hideUnauthorizedCommands;
+    }
+
+    public boolean isMaskNoPermissionErrors() {
+        return maskNoPermissionErrors;
+    }
+
     public boolean isCommandFilterEnabled() {
         return commandFilterEnabled;
     }
@@ -310,5 +353,17 @@ public class SpoofConfig {
 
     public boolean isUnwrapExecuteCommands() {
         return unwrapExecuteCommands;
+    }
+
+    public boolean isAdminAlertsEnabled() {
+        return adminAlertsEnabled;
+    }
+
+    public String getClientPrefixAlertFormat() {
+        return clientPrefixAlertFormat;
+    }
+
+    public String getBlockedCommandAlertFormat() {
+        return blockedCommandAlertFormat;
     }
 }

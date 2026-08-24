@@ -104,6 +104,15 @@ command-tree:
 unknown-command-message: "&cUnknown or incomplete command, see below for error\n&c<--[HERE]"
 
 # ==============================================================================
+# Strict Permission & Command Cloaking
+# ==============================================================================
+strict-permission-cloaking:
+  # Hide all commands the player does not have permission for from Tab-Complete & Brigadier tree
+  hide-unauthorized-commands: true
+  # Intercept unauthorized commands and normalize "No permission" errors into Vanilla Unknown Command
+  mask-no-permission-errors: true
+
+# ==============================================================================
 # Advanced Command Filter & Client Prefix Interceptor
 # ==============================================================================
 command-filter:
@@ -158,3 +167,13 @@ command-filter:
 
   # Automatically unwrap nested commands (e.g. /execute as @p run ver)
   unwrap-execute-commands: true
+
+# ==============================================================================
+# Admin & Staff Security Alerts
+# ==============================================================================
+admin-alerts:
+  enabled: true
+  # Alert sent to staff with 'pluginspoofer.admin' permission when a hacked client prefix is caught in chat
+  client-prefix-alert: "&c[PluginSpoofer Alert] &ePlayer &f%player% &eđã gửi lệnh nghi vấn client hack: &c%message%"
+  # Alert sent to staff when a player attempts to run/probe a blocked command or hidden plugin
+  blocked-command-alert: "&c[PluginSpoofer Alert] &ePlayer &f%player% &ecố gắng chạy/dò quét lệnh bị chặn: &c%command%"

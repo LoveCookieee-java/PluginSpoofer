@@ -1,8 +1,13 @@
 package dev.khoa.plugin.pluginspoofer.manager;
 
+import dev.khoa.plugin.pluginspoofer.PluginSpoofer;
 import dev.khoa.plugin.pluginspoofer.config.FakePluginModel;
 import dev.khoa.plugin.pluginspoofer.config.SpoofConfig;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandMap;
+import org.bukkit.entity.Player;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -155,7 +160,7 @@ public class PluginSpoofManager {
      */
     public boolean isBlockedCommand(SpoofConfig config, String rawCommand) {
         if (rawCommand == null || rawCommand.isBlank()) return false;
-        
+
         String clean = config.isUnwrapExecuteCommands() ? unwrapCommand(rawCommand) : stripSlash(rawCommand).trim();
         if (clean.isEmpty()) return false;
 
@@ -246,8 +251,17 @@ public class PluginSpoofManager {
     /**
      * Filters the Brigadier command tree packet (PlayerCommandSendEvent).
      */
-    public void filterCommandTree(SpoofConfig config, Collection<String> commands) {
+    public void filterCommandTree(SpoofConfig config, Collection<String> commands, Player player) {
         if (commands == null) return;
+
+        CommandMap commandMap = null;
+        try {
+            commandMap = Bukkit.getCommandMap();
+        } catch (Throwable ignored) {
+            // Null in pure unit tests without Bukkit mock
+        }
+
+        final CommandMap finalMap = commandMap;
 
         commands.removeIf(command -> {
             String lower = command.toLowerCase(Locale.ROOT);
@@ -279,6 +293,14 @@ public class PluginSpoofManager {
                 }
             }
 
+            // Strict Permission Cloaking: Filter commands the player has no permission for
+            if (config.isHideUnauthorizedCommands() && player != null && finalMap != null) {
+                Command registeredCmd = finalMap.getCommand(lower);
+                if (registeredCmd != null && !registeredCmd.testPermissionSilent(player)) {
+                    return true;
+                }
+            }
+
             return false;
         });
 
@@ -288,6 +310,44 @@ public class PluginSpoofManager {
                 commands.addAll(fakePlugin.fakeCommands());
             }
         }
+    }
+
+    /**
+     * Backward-compatible filterCommandTree overload without player argument.
+     */
+    public void filterCommandTree(SpoofConfig config, Collection<String> commands) {
+        filterCommandTree(config, commands, null);
+    }
+
+    /**
+     * Broadcasts security alerts to online admins/staff and console.
+     */
+    public void alertStaff(String alertMessage) {
+        if (alertMessage == null || alertMessage.isBlank()) return;
+        String formatted = colorize(alertMessage);
+
+        try {
+            Bukkit.getConsoleSender().sendMessage(formatted);
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                if (player.hasPermission("pluginspoofer.admin")) {
+                    player.sendMessage(formatted);
+                }
+            }
+        } catch (Throwable ignored) {
+            // In unit tests without Bukkit runtime
+        }
+    }
+
+    public String formatClientPrefixAlert(SpoofConfig config, String playerName, String message) {
+        return config.getClientPrefixAlertFormat()
+                .replace("%player%", playerName != null ? playerName : "Unknown")
+                .replace("%message%", message != null ? message : "");
+    }
+
+    public String formatBlockedCommandAlert(SpoofConfig config, String playerName, String command) {
+        return config.getBlockedCommandAlertFormat()
+                .replace("%player%", playerName != null ? playerName : "Unknown")
+                .replace("%command%", command != null ? command : "");
     }
 
     private static String stripSlash(String str) {

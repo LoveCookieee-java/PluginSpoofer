@@ -4,6 +4,9 @@ import dev.khoa.plugin.pluginspoofer.PluginSpoofer;
 import dev.khoa.plugin.pluginspoofer.config.FakePluginModel;
 import dev.khoa.plugin.pluginspoofer.config.SpoofConfig;
 import dev.khoa.plugin.pluginspoofer.manager.PluginSpoofManager;
+import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandMap;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -16,7 +19,7 @@ import java.util.Optional;
 
 /**
  * Layer 3 & 4: Direct Command Interceptor, Permission Oracle Normalizer,
- * and Advanced Command Filter with Execute Unwrapping.
+ * Strict Permission Lockdown, and Admin Alerts.
  */
 public class CommandPreprocessListener implements Listener {
 
@@ -94,6 +97,28 @@ public class CommandPreprocessListener implements Listener {
         if (plugin.getManager().isBlockedCommand(config, clean) || plugin.getManager().isBlockedCommand(config, targetCommand)) {
             event.setCancelled(true);
             player.sendMessage(plugin.getManager().getBlockResponseMessage(config));
+            if (config.isAdminAlertsEnabled()) {
+                plugin.getManager().alertStaff(plugin.getManager().formatBlockedCommandAlert(config, player.getName(), rawMessage));
+            }
+            return;
+        }
+
+        // Strict Permission Cloaking: Check if real command exists on server but player has no permission
+        if (config.isMaskNoPermissionErrors()) {
+            try {
+                CommandMap commandMap = Bukkit.getCommandMap();
+                if (commandMap != null) {
+                    Command registeredCmd = commandMap.getCommand(commandRoot);
+                    if (registeredCmd != null && !registeredCmd.testPermissionSilent(player)) {
+                        event.setCancelled(true);
+                        player.sendMessage(plugin.getManager().getBlockResponseMessage(config));
+                        if (config.isAdminAlertsEnabled()) {
+                            plugin.getManager().alertStaff(plugin.getManager().formatBlockedCommandAlert(config, player.getName(), rawMessage));
+                        }
+                    }
+                }
+            } catch (Throwable ignored) {
+            }
         }
     }
 }

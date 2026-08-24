@@ -11,7 +11,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 /**
- * Intercepts chat messages starting with hacked client prefixes (e.g. '.', '#', '@', ',', ';', '!').
+ * Intercepts chat messages starting with hacked client prefixes (e.g. '.', '#', '@', ',', ';', '!')
+ * and triggers Admin Security Alerts.
  */
 public class ChatFilterListener implements Listener {
 
@@ -37,6 +38,9 @@ public class ChatFilterListener implements Listener {
         if (plugin.getManager().hasBlockedPrefix(config, plainText)) {
             event.setCancelled(true);
             player.sendMessage(plugin.getManager().getBlockResponseMessage(config));
+            if (config.isAdminAlertsEnabled()) {
+                plugin.getManager().alertStaff(plugin.getManager().formatClientPrefixAlert(config, player.getName(), plainText));
+            }
         }
     }
 
@@ -56,6 +60,9 @@ public class ChatFilterListener implements Listener {
         if (plugin.getManager().hasBlockedPrefix(config, message)) {
             event.setCancelled(true);
             player.sendMessage(plugin.getManager().getBlockResponseMessage(config));
+            if (config.isAdminAlertsEnabled()) {
+                plugin.getManager().alertStaff(plugin.getManager().formatClientPrefixAlert(config, player.getName(), message));
+            }
         }
     }
 }

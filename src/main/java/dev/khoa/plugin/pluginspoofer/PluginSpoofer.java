@@ -46,13 +46,29 @@ public final class PluginSpoofer extends JavaPlugin implements CommandExecutor, 
             cmd.setTabCompleter(this);
         }
 
-        getLogger().info("PluginSpoofer v" + getPluginMeta().getVersion() + " initialized successfully. " +
-                "Mode: " + spoofConfig.getMode() + ", Loaded " + spoofConfig.getFakePlugins().size() + " fake plugins.");
+        printBanner();
     }
 
     @Override
     public void onDisable() {
         getLogger().info("PluginSpoofer disabled.");
+    }
+
+    private void printBanner() {
+        var logger = getLogger();
+        logger.info("");
+        logger.info("  ██████╗  ██████╗   ██████╗  ██╗  ██╗ ██╗ ███████╗");
+        logger.info(" ██╔════╝ ██╔═══██╗ ██╔═══██╗ ██║ ██╔╝ ██║ ██╔════╝");
+        logger.info(" ██║      ██║   ██║ ██║   ██║ █████═╝  ██║ █████╗  ");
+        logger.info(" ██║      ██║   ██║ ██║   ██║ ██╔═██╗  ██║ ██╔══╝  ");
+        logger.info(" ╚██████╗ ╚██████╔╝ ╚██████╔╝ ██║ ╚██╗ ██║ ███████╗");
+        logger.info("  ╚═════╝  ╚═════╝   ╚═════╝  ╚═╝  ╚═╝ ╚═╝ ╚══════╝");
+        logger.info("  ──────────────────────────────────────────────────");
+        logger.info("   • Plugin: PluginSpoofer [V1]");
+        logger.info("   • Author: Cookieee | Platform: Paper, Folia 1.21+");
+        logger.info("   • System: Active | Mode: " + spoofConfig.getMode());
+        logger.info("  ──────────────────────────────────────────────────");
+        logger.info("");
     }
 
     public synchronized void reloadSpoofConfig() {

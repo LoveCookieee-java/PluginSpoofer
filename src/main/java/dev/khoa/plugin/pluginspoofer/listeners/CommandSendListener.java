@@ -11,7 +11,7 @@ import org.bukkit.event.player.PlayerCommandSendEvent;
 /**
  * Layer 1: Brigadier Command Tree Cloaking.
  * Intercepts ClientboundCommandsPacket command tree sent to players,
- * stripping sensitive colon commands and injecting fake plugin commands.
+ * stripping sensitive colon commands, unauthorized commands, and injecting fake plugin commands.
  */
 public class CommandSendListener implements Listener {
 
@@ -33,6 +33,6 @@ public class CommandSendListener implements Listener {
             return;
         }
 
-        plugin.getManager().filterCommandTree(config, event.getCommands());
+        plugin.getManager().filterCommandTree(config, event.getCommands(), player);
     }
 }
