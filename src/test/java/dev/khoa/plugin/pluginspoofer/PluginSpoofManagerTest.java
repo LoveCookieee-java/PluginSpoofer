@@ -295,4 +295,20 @@ class PluginSpoofManagerTest {
         assertTrue(defaultConfig.isMaskNoPermissionErrors());
         assertTrue(defaultConfig.isAdminAlertsEnabled());
     }
+
+    @Test
+    @DisplayName("TC-15: Verify Case Insensitivity & Complex Execute Wrapping")
+    void testTC15_ComplexExecuteWrappingAndCase() {
+        assertTrue(manager.isBlockedCommand(defaultConfig, "/EXECUTE AS @P RUN STOP"));
+        assertTrue(manager.isBlockedCommand(defaultConfig, "/execute if entity @e[type=player] run grim reload"));
+        assertEquals("VER   WorldEdit", manager.unwrapCommand("/EXECUTE   RUN   VER   WorldEdit"));
+    }
+
+    @Test
+    @DisplayName("TC-16: Verify Unknown Colon Namespace Command Filtering")
+    void testTC16_UnknownColonNamespaceFilter() {
+        assertTrue(manager.isHiddenCommandOrPlugin(defaultConfig, "/randomplugin:randomcommand"));
+        assertFalse(manager.isHiddenCommandOrPlugin(defaultConfig, "/worldedit:wand"));
+        assertFalse(manager.isHiddenCommandOrPlugin(defaultConfig, "/essentials:spawn"));
+    }
 }
